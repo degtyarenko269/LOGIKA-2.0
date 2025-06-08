@@ -13,7 +13,7 @@ function generateFiveDayForecastWithGeolocation() {
         const lon = position.coords.longitude;
 
         const cityName = await getCityName(lat, lon);
-        document.getElementById("city-name").textContent = Ваше місто: ${cityName};
+        document.getElementById("city-name").textContent = `Ваше місто: ${cityName}`;
 
         const weatherData = await getForecastWeather(lat, lon);
         if (!weatherData) {
@@ -82,11 +82,11 @@ function renderForecast(forecastArray) {
 
     const temp = Math.round(item.main.temp);
     const description = item.weather[0].description;
-    const weatherText = ${description}, ${temp}°C;
+    const weatherText = `${description}, ${temp}°C`;
 
     const dayDiv = document.createElement("div");
     dayDiv.className = "day";
-    dayDiv.innerHTML = <strong>${dayName}</strong><br>${formattedDate};
+    dayDiv.innerHTML = `<strong>${dayName}</strong><br>${formattedDate}`;
     dayDiv.onclick = () => showDetails(dayName, formattedDate, weatherText);
 
     weekDiv.appendChild(dayDiv);
@@ -96,7 +96,7 @@ function renderForecast(forecastArray) {
 function showDetails(dayName, date, weather) {
   document.getElementById("week").style.display = "none";
   document.getElementById("details").style.display = "block";
-  document.getElementById("day-name").textContent = ${dayName}, ${date};
+  document.getElementById("day-name").textContent = `${dayName}, ${date}`;
   document.getElementById("weather-text").textContent = weather;
 }
 
