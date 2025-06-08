@@ -1,37 +1,40 @@
+const apiKey = "ВАШ_API_КЛЮЧ"; // ← ВСТАВЬТЕ СЮДА СВОЙ API-КЛЮЧ
 const daysOfWeek = [
   "Понедельник", "Вторник", "Среда",
   "Четверг", "Пятница", "Суббота", "Воскресенье"
 ];
 
-const weatherDescriptions = [
-  "☀️ Солнечно, +25°C",
-  "🌤 Переменная облачность, +22°C",
-  "🌧 Дождь, +18°C",
-  "🌩 Гроза, +20°C",
-  "☁️ Пасмурно, +19°C",
-  "🌬 Ветрено, +21°C",
-  "❄️ Снег, 0°C"
-];
+async function fetchWeather() {
+  const lat = 49.99;  // Харьков
+  const lon = 36.23;
+  const url = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,alerts&units=metric&lang=ru&appid=${apiKey}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Ошибка загрузки данных: ${res.status}`);
+  return await res.json();
+}
 
-const today = new Date();
-
-function generateWeek() {
+async function init() {
   const weekDiv = document.getElementById('week');
+  weekDiv.innerHTML = "Загрузка...";
+  try {
+    const data = await fetchWeather();
+    weekDiv.innerHTML = "";
 
-  for (let i = 0; i < 7; i++) {
-    const dayDate = new Date();
-    dayDate.setDate(today.getDate() + i);
-
-    const dayIndex = dayDate.getDay() === 0 ? 6 : dayDate.getDay() - 1;
-    const dayName = daysOfWeek[dayIndex];
-    const formattedDate = dayDate.toLocaleDateString('ru-RU');
-
-    const dayDiv = document.createElement('div');
-    dayDiv.className = 'day';
-    dayDiv.innerHTML = `<strong>${dayName}</strong><br>${formattedDate}`;
-    dayDiv.onclick = () => showDetails(dayName, formattedDate, weatherDescriptions[dayIndex]);
-
-    weekDiv.appendChild(dayDiv);
+    data.daily.slice(0, 7).forEach((day, i) => {
+      const date = new Date(day.dt * 1000);
+      const dayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1;
+      const dayName = daysOfWeek[dayIndex];
+      const formattedDate = date.toLocaleDateString('ru-RU');
+      const desc = `${Math.round(day.temp.day)}°C, ${day.weather[0].description}`;
+      const dayDiv = document.createElement('div');
+      dayDiv.className = 'day';
+      dayDiv.innerHTML = `<strong>${dayName}</strong><br>${formattedDate}`;
+      dayDiv.onclick = () => showDetails(dayName, formattedDate, desc);
+      weekDiv.appendChild(dayDiv);
+    });
+  } catch (e) {
+    console.error(e);
+    weekDiv.innerHTML = "Не удалось загрузить прогноз погоды.";
   }
 }
 
@@ -47,4 +50,4 @@ function showWeek() {
   document.getElementById('week').style.display = 'flex';
 }
 
-generateWeek();
+init();
